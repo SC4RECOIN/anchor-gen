@@ -149,7 +149,7 @@ pub fn generate_struct(
     } else {
         quote! {}
     };
-    let derive_serializers = if opts.zero_copy {
+    let derive_serializers = if opts.zero_copy || opts.zero_copy_unsafe {
         let repr = if opts.packed {
             quote! {
                 #[repr(packed)]
@@ -159,9 +159,16 @@ pub fn generate_struct(
                 #[repr(C)]
             }
         };
-        quote! {
-            #[zero_copy]
-            #repr
+        if opts.zero_copy {
+            quote! {
+                #[zero_copy]
+                #repr
+            }
+        } else {
+            quote! {
+                #[zero_copy(unsafe)]
+                #repr
+            }
         }
     } else {
         let derive_copy = if props.can_copy {

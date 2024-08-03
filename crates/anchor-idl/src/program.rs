@@ -18,6 +18,8 @@ pub struct GeneratorOptions {
     pub idl_path: String,
     /// List of zero copy structs.
     pub zero_copy: Option<PathList>,
+    /// List of zero copy unsafe structs.
+    pub zero_copy_unsafe: Option<PathList>,
     /// List of `repr(packed)` structs.
     pub packed: Option<PathList>,
 }
@@ -39,6 +41,7 @@ impl GeneratorOptions {
         let idl: anchor_syn::idl::Idl = serde_json::from_str(&idl_contents).unwrap();
 
         let zero_copy = path_list_to_string(self.zero_copy.as_ref());
+        let zero_copy_unsafe = path_list_to_string(self.zero_copy_unsafe.as_ref());
         let packed = path_list_to_string(self.packed.as_ref());
 
         let mut struct_opts: BTreeMap<String, StructOpts> = BTreeMap::new();
@@ -48,6 +51,7 @@ impl GeneratorOptions {
                 name.to_string(),
                 StructOpts {
                     zero_copy: zero_copy.contains(name),
+                    zero_copy_unsafe: zero_copy_unsafe.contains(name),
                     packed: packed.contains(name),
                 },
             );
@@ -61,6 +65,7 @@ impl GeneratorOptions {
 pub struct StructOpts {
     pub packed: bool,
     pub zero_copy: bool,
+    pub zero_copy_unsafe: bool,
 }
 
 pub struct Generator {

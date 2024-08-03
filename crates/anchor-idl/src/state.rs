@@ -15,7 +15,7 @@ pub fn generate_account(
 ) -> TokenStream {
     let props = get_field_list_properties(defs, fields);
 
-    let derive_copy = if props.can_copy && !opts.zero_copy {
+    let derive_copy = if props.can_copy && !opts.zero_copy && !opts.zero_copy_unsafe {
         quote! {
             #[derive(Copy)]
         }
@@ -29,7 +29,7 @@ pub fn generate_account(
     } else {
         quote! {}
     };
-    let derive_account = if opts.zero_copy {
+    let derive_account = if opts.zero_copy || opts.zero_copy_unsafe {
         let repr = if opts.packed {
             quote! {
                 #[repr(packed)]
@@ -39,9 +39,16 @@ pub fn generate_account(
                 #[repr(C)]
             }
         };
-        quote! {
-            #[account(zero_copy)]
-            #repr
+        if opts.zero_copy {
+            quote! {
+                #[account(zero_copy)]
+                #repr
+            }
+        } else {
+            quote! {
+                #[account(zero_copy(unsafe))]
+                #repr
+            }
         }
     } else {
         quote! {
