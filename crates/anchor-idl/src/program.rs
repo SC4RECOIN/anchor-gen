@@ -40,8 +40,10 @@ impl GeneratorOptions {
         let idl_contents = fs::read_to_string(&path).unwrap();
         let idl: anchor_syn::idl::Idl = serde_json::from_str(&idl_contents).unwrap();
 
-        let zero_copy = path_list_to_string(self.zero_copy.as_ref());
+        let mut zero_copy = path_list_to_string(self.zero_copy.as_ref());
         let zero_copy_unsafe = path_list_to_string(self.zero_copy_unsafe.as_ref());
+        zero_copy.extend(zero_copy_unsafe.clone());
+
         let packed = path_list_to_string(self.packed.as_ref());
 
         let mut struct_opts: BTreeMap<String, StructOpts> = BTreeMap::new();
